@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+
+  redis:
+    image: redis
+    container_name: REDIS
+    ports:
+      - "6379:6379"
+
+  mysql:
+    restart: always
+    image: mysql:8.0.19
+    container_name: MYSQL_DATABASE
+    environment:
+      - "MYSQL_ROOT_PASSWORD=1234"
+      - "MYSQL_DATABASE=demo"
+    ports:
+      - 3306:3306
