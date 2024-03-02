@@ -2,9 +2,10 @@ package cc.demo.order.controller.order.dto;
 
 import cc.demo.order.dto.Pagination;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
-
-import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor

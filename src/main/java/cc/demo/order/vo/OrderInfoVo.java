@@ -13,11 +13,9 @@ public class OrderInfoVo {
 
     private String orderUid;
 
-    private BigDecimal price;
+    private BigDecimal totalPrice;
 
     private int orderStatus;
-
-    private List<OrderItemVo> orderItemVoList;
 
     private Date createTime;
 

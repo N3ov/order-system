@@ -1,6 +1,7 @@
 package cc.demo.order.repository;
 
 import cc.demo.order.model.User;
+import cc.demo.order.vo.UserInfoVo;
 import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,14 +34,14 @@ public class UserRepositoryImpl implements UserRepository{
     }
 
     @Override
-    public List<UserVo> getUsersById(List<Long> userIds) {
+    public List<UserInfoVo> getUsersById(List<Long> userIds) {
         String sql = """
-                select uid as user_uid, user_name, email from user where id in (:userIds);
+                select uid, user_name, email, create_time from user where id in (:userIds);
                 """;
 
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("userIds", userIds);
 
-        return template.query(sql, namedParameters, new BeanPropertyRowMapper<>(UserVo.class));
+        return template.query(sql, namedParameters, new BeanPropertyRowMapper<>(UserInfoVo.class));
     }
 
     @Override

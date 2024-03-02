@@ -30,6 +30,11 @@ public class ProductRepository {
         return template.query(sql, map, new BeanPropertyRowMapper<>(ProductVo.class));
     }
 
+    public List<ProductVo> findAllProducts() {
+        String sql = "SELECT * FROM product";
+        return template.query(sql, new BeanPropertyRowMapper<>(ProductVo.class));
+    }
+
     public void create(Product product) {
         String sql = """
                 INSERT INTO product (product_id, product_name, price, product_status, product_desc, create_time)

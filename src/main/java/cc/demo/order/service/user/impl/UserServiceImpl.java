@@ -6,6 +6,7 @@ import cc.demo.order.infra.util.UidUtil;
 import cc.demo.order.model.User;
 import cc.demo.order.repository.UserRepository;
 import cc.demo.order.service.user.UserService;
+import cc.demo.order.vo.UserInfoVo;
 import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -48,7 +49,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserVo> getUsers(List<Long> userIds) {
+    public List<UserInfoVo> getUsers(List<Long> userIds) {
         return userRepository.getUsersById(userIds);
     }
 

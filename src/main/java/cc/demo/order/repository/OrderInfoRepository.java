@@ -22,8 +22,8 @@ public class OrderInfoRepository {
 
     public void createOrder(OrderInfo order) {
         String sql = """
-                INSERT INTO order_info (order_uid, user_id, order_status, create_time)
-                VALUES (:orderUid, :userId, :orderStatus, :createTime)
+                INSERT INTO order_info (order_uid, user_id, total_price, order_status, create_time)
+                VALUES (:orderUid, :userId, :orderStatus, :totalPrice, :createTime)
                 """;
         template.update(sql, new BeanPropertySqlParameterSource(order));
     }
@@ -59,7 +59,7 @@ public class OrderInfoRepository {
         Optional.ofNullable(dto.getBuyTime())
                 .ifPresent(t -> {
                     checkSql(sb);
-                    sb.append("oi.create_time = :buyTime");
+                    sb.append(" oi.create_time = :buyTime");
                     params.addValue("buyTime", t);
                 });
 
@@ -73,7 +73,11 @@ public class OrderInfoRepository {
     public List<OrderCalculateVo> getOrderCalculate(int count) {
 
         MapSqlParameterSource params = new MapSqlParameterSource();
-        String sql = "select user_id, count(order_uid) from order_info group by user_id having count(order_uid) > :count";
+        String sql = """
+            select user_id, count(order_uid) as order_count from order_info
+            group by user_id
+            having count(order_uid) > :count
+        """;
 
         params.addValue("count", count);
 

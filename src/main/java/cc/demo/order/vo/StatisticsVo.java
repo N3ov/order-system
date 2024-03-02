@@ -7,6 +7,6 @@ import lombok.Data;
 @Builder
 public class StatisticsVo<T> {
 
-    T user;
+    T users;
 
 }

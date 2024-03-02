@@ -19,6 +19,8 @@ public class OrderPagingVo {
 
     private long userId;
 
+    private BigDecimal totalPrice;
+
     private int orderStatus;
 
     private Date createTime;

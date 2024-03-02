@@ -12,10 +12,7 @@ import cc.demo.order.repository.OrderInfoRepository;
 import cc.demo.order.repository.OrderItemRepository;
 import cc.demo.order.service.product.ProductService;
 import cc.demo.order.service.user.UserService;
-import cc.demo.order.vo.OrderCalculateVo;
-import cc.demo.order.vo.OrderPagingVo;
-import cc.demo.order.vo.ProductVo;
-import cc.demo.order.vo.UserVo;
+import cc.demo.order.vo.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +22,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,46 +38,63 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public void createOrder(OrderReqDto dto) {
+    public OrderInfoVo createOrder(OrderReqDto dto) {
         String uid = UidUtil.generateUid(15);
         Date now = new Date();
+        int orderStatus = OrderStatusEnum.UNPAID.getCode();
         List<OrderItemDto> orderItemDtoList = convertItems(dto.getProducts());
 
         List<Long> productIds = orderItemDtoList.stream().map(OrderItemDto::getProductId).collect(Collectors.toList());
-        // TODO check product exist or available
-        checkOderItems();
 
-        Map<Long, ProductVo> productVoMap = productService.getProducts(productIds).stream().collect(Collectors.toMap(ProductVo::getProductId, p -> p));
+        Map<Long, ProductVo> productVoMap = productService.getProducts(productIds).stream()
+                .filter(p -> ProductStatusEnum.AVAILABLE.getCode().equals(p.getProductStatus()))
+                .collect(Collectors.toMap(ProductVo::getProductId, p -> p));
 
-        List<OrderItem> orderItems = new ArrayList<>();
-
-        for (OrderItemDto orderItemDto : orderItemDtoList) {
-            ProductVo productVo = productVoMap.get(orderItemDto.getProductId());
-
-            if (productVo != null && ProductStatusEnum.AVAILABLE.getCode().equals(productVo.getProductStatus())) {
-                OrderItem orderItem = OrderItem.builder()
-                        .orderUid(uid)
-                        .productId(productVo.getProductId())
-                        .quantity(orderItemDto.getQuantity())
-                        .createTime(now)
-                        .build();
-
-                orderItems.add(orderItem);
-            }
-        }
+        List<OrderItem> orderItems = orderItemDtoList.stream()
+                .filter(orderItemDto ->
+                        productVoMap.containsKey(orderItemDto.getProductId())
+                                && productVoMap.get(orderItemDto.getProductId()).getProductStatus() == ProductStatusEnum.AVAILABLE.getCode()
+                ).map(orderItemDto -> {
+                    ProductVo productVo = productVoMap.get(orderItemDto.getProductId());
+                    return OrderItem.builder()
+                            .orderUid(uid)
+                            .productId(productVo.getProductId())
+                            .quantity(orderItemDto.getQuantity())
+                            .createTime(now)
+                            .build();
+                }).toList();
 
         Optional<UserVo> user = Optional.ofNullable(userService.getUser(dto.getUserUid()));
-        if (!orderItemDtoList.isEmpty() && user.isPresent()) {
+
+        BigDecimal totalPrice = orderItems.stream()
+                .mapToDouble(orderItem -> {
+                    BigDecimal quantity = BigDecimal.valueOf(orderItem.getQuantity());
+                    BigDecimal pricePerUnit = productVoMap.get(orderItem.getProductId()).getPrice();
+                    return quantity.multiply(pricePerUnit).doubleValue();
+                })
+                .mapToObj(BigDecimal::valueOf)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (!orderItems.isEmpty() && user.isPresent()) {
             orderInfoRepository.createOrder(
                     OrderInfo.builder()
                             .orderUid(uid)
                             .userId(user.get().getId())
-                            .orderStatus(OrderStatusEnum.UNPAID.getCode())
+                            .orderStatus(orderStatus)
+                            .totalPrice(totalPrice)
                             .createTime(now)
                             .build());
 
             orderItemRepository.save(orderItems);
         }
+
+
+        return OrderInfoVo.builder()
+                .orderUid(uid)
+                .totalPrice(totalPrice)
+                .createTime(now)
+                .orderStatus(orderStatus)
+                .build();
 
     }
 

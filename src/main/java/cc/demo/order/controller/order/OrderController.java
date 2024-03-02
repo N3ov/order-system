@@ -4,6 +4,7 @@ import cc.demo.order.controller.order.dto.OrderPagingReq;
 import cc.demo.order.controller.order.dto.OrderReqDto;
 import cc.demo.order.infra.response.ResponseDto;
 import cc.demo.order.service.order.OrderService;
+import cc.demo.order.vo.OrderInfoVo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,11 +18,9 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/create")
-    public ResponseDto<String> createOrder(@Valid @RequestBody OrderReqDto dto) {
+    public ResponseDto<OrderInfoVo> createOrder(@Valid @RequestBody OrderReqDto dto) {
 
-        orderService.createOrder(dto);
-
-        return ResponseDto.success();
+        return ResponseDto.success(orderService.createOrder(dto));
     }
 
     @GetMapping("/page")

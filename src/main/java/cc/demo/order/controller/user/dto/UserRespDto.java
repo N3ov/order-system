@@ -1,6 +1,5 @@
 package cc.demo.order.controller.user.dto;
 
-import cc.demo.order.infra.enums.UserStatusEnum;
 import lombok.Builder;
 import lombok.Data;
 

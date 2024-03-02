@@ -6,6 +6,7 @@ import cc.demo.order.model.Product;
 import cc.demo.order.repository.ProductRepository;
 import cc.demo.order.vo.ProductVo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,6 +33,7 @@ public class ProductServiceImpl implements ProductService {
         productRepository.create(product);
     }
 
+    @Cacheable(value = "productCache", key = "#productId", unless = "#result == null")
     @Override
     public ProductVo getProduct(int productId) {
         return productRepository.findById(productId);
@@ -41,4 +43,10 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductVo> getProducts(List<Long> productIds) {
         return Collections.unmodifiableList(productRepository.findProducts(productIds));
     }
+
+    @Override
+    public List<ProductVo> getAllProduct() {
+        return Collections.unmodifiableList(productRepository.findAllProducts());
+    }
+
 }
