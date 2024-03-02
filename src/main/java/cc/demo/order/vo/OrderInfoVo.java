@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class OrderVo {
+public class OrderInfoVo {
 
     private String orderUid;
 
