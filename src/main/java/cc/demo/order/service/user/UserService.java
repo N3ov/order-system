@@ -11,9 +11,14 @@ import java.util.List;
 public interface UserService {
 
     User createUser(UserReqDto dto);
-    User getUser(String uid);
+
+    UserVo getUser(String uid);
+
     List<UserVo> getUsers(List<Long> userIds);
+
     void updateUser(String id, UserReqDto dto);
+
     void deleteUser(String uid);
+
     Page<User> findUserPaging(Pageable pageable);
 }

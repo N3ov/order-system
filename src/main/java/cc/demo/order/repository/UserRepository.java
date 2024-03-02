@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface UserRepository {
 
-    User getUserByUid(String uid);
+    UserVo getUserByUid(String uid);
     List<UserVo> getUsersById(List<Long> userIds);
     int createUser(User user);
     int updateUser(User user);

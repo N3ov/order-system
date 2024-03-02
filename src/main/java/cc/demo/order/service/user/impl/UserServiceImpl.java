@@ -8,6 +8,8 @@ import cc.demo.order.repository.UserRepository;
 import cc.demo.order.service.user.UserService;
 import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,8 +41,9 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    @Cacheable(value = "userCache", key = "#uid", unless = "#result == null")
     @Override
-    public User getUser(String uid) {
+    public UserVo getUser(String uid) {
         return userRepository.getUserByUid(uid);
     }
 
@@ -51,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(String uid, UserReqDto dto) {
-        Optional<User> currentUser = Optional.ofNullable(userRepository.getUserByUid(uid));
+        Optional<UserVo> currentUser = Optional.ofNullable(userRepository.getUserByUid(uid));
         if (currentUser.isPresent()) {
             User user = User.builder().build();
 
@@ -69,9 +72,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @CacheEvict(value = "userCache", key = "#uid")
     @Override
     public void deleteUser(String uid) {
-        Optional<User> user = Optional.ofNullable(userRepository.getUserByUid(uid));
+        Optional<UserVo> user = Optional.ofNullable(userRepository.getUserByUid(uid));
         user.ifPresent(value -> userRepository.deleteUser(value.getId()));
     }
 

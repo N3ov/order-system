@@ -23,13 +23,13 @@ public class UserRepositoryImpl implements UserRepository{
 
 
     @Override
-    public User getUserByUid(String uid) {
+    public UserVo getUserByUid(String uid) {
         String sql = """
                 select * from user where uid = :uid;
                 """;
 
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("uid", uid);
-        return template.queryForObject(sql, namedParameters, new BeanPropertyRowMapper<>(User.class));
+        return template.queryForObject(sql, namedParameters, new BeanPropertyRowMapper<>(UserVo.class));
     }
 
     @Override

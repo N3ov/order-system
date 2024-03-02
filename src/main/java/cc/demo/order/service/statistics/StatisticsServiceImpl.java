@@ -23,7 +23,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<OrderCalculateVo> orderCounts = orderService.getOrderCalculate(count);
 
         List<UserVo> userVos = userService.getUsers(orderCounts.stream().map(OrderCalculateVo::getUserId).collect(Collectors.toList()));
-        Map<String, UserVo> userMap = userVos.stream().collect(Collectors.toMap(UserVo::getUserUid, user -> user));
+        Map<String, UserVo> userMap = userVos.stream().collect(Collectors.toMap(UserVo::getUid, user -> user));
 
         return StatisticsVo.builder().user(userMap).build();
     }

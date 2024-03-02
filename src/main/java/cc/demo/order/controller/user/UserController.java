@@ -2,13 +2,17 @@ package cc.demo.order.controller.user;
 
 import cc.demo.order.controller.user.dto.UserReqDto;
 import cc.demo.order.controller.user.dto.UserRespDto;
+import cc.demo.order.dto.Pagination;
 import cc.demo.order.infra.enums.UserStatusEnum;
 import cc.demo.order.infra.response.ResponseDto;
 import cc.demo.order.model.User;
 import cc.demo.order.service.user.UserService;
+import cc.demo.order.vo.UserVo;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +36,7 @@ public class UserController {
                         .userName(user.getUserName())
                         .uid(user.getUid())
                         .createTime(user.getCreateTime())
-                        .userStatus(UserStatusEnum.getStatus(user.getUserStatus()))
+                        .userStatus(user.getUserStatus())
                         .build());
     }
 
@@ -48,21 +52,20 @@ public class UserController {
 
     @GetMapping
     public ResponseDto<UserRespDto> getUser(@RequestParam @NotBlank String uid) {
-        User user = userService.getUser(uid);
+        UserVo user = userService.getUser(uid);
         return ResponseDto.<UserRespDto>success(
                 UserRespDto.builder()
                         .uid(user.getUid())
                         .userName(user.getUserName())
-                        .userStatus(UserStatusEnum.getStatus(user.getUserStatus()))
+                        .userStatus(user.getStatus())
+                        .createTime(user.getCreateTime())
                         .build()
         );
     }
 
-    @GetMapping("/{page}/{rows}")
-    public ResponseDto<Page<User>> getUserPaging(@PathVariable("page") int page,
-                                    @PathVariable("rows") int rows) {
-        Pageable pageable = PageRequest.of(page, rows, Sort.by("id").descending());
-        Page<User> userPage = userService.findUserPaging(pageable);
+    @GetMapping("/page")
+    public ResponseDto<Page<User>> getUserPaging(@RequestParam Pagination page) {
+        Pageable pageable = PageRequest.of(page.getPage(), page.getSize(), Sort.by("id").descending());        Page<User> userPage = userService.findUserPaging(pageable);
         return ResponseDto.success(userPage);
     }
 

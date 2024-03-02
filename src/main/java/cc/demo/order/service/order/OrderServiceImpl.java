@@ -8,7 +8,6 @@ import cc.demo.order.infra.enums.ProductStatusEnum;
 import cc.demo.order.infra.util.UidUtil;
 import cc.demo.order.model.OrderInfo;
 import cc.demo.order.model.OrderItem;
-import cc.demo.order.model.User;
 import cc.demo.order.repository.OrderInfoRepository;
 import cc.demo.order.repository.OrderItemRepository;
 import cc.demo.order.service.product.ProductService;
@@ -16,6 +15,7 @@ import cc.demo.order.service.user.UserService;
 import cc.demo.order.vo.OrderCalculateVo;
 import cc.demo.order.vo.OrderPagingVo;
 import cc.demo.order.vo.ProductVo;
+import cc.demo.order.vo.UserVo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,7 +68,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        Optional<User> user = Optional.ofNullable(userService.getUser(dto.getUserUid()));
+        Optional<UserVo> user = Optional.ofNullable(userService.getUser(dto.getUserUid()));
         if (!orderItemDtoList.isEmpty() && user.isPresent()) {
             orderInfoRepository.createOrder(
                     OrderInfo.builder()
@@ -86,7 +86,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<List<OrderPagingVo>> getOrderPaging(OrderPagingReq dto) {
 
-        Optional<User> user = Optional.ofNullable(userService.getUser(dto.getUserUid()));
+        Optional<UserVo> user = Optional.ofNullable(userService.getUser(dto.getUserUid()));
         if (user.isPresent()) {
             List<OrderPagingVo> pageResult = orderInfoRepository.getOrderPaging(dto, user.get().getId());
             return new PageImpl<>(Collections.singletonList(pageResult));
