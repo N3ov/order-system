@@ -1,9 +1,12 @@
-package cc.demo.order.service.user;
+package cc.demo.order.service.user.impl;
 
 import cc.demo.order.controller.user.dto.UserReqDto;
 import cc.demo.order.infra.enums.UserStatusEnum;
+import cc.demo.order.infra.util.UidUtil;
 import cc.demo.order.model.User;
 import cc.demo.order.repository.UserRepository;
+import cc.demo.order.service.user.UserService;
+import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -11,8 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,12 +23,11 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-
     @Override
     public User createUser(UserReqDto dto) {
 
         User user = User.builder()
-                .uid(UUID.randomUUID().toString().replace("-", "").substring(0, 9))
+                .uid(UidUtil.generateUid(9))
                 .userName(dto.getUserName())
                 .password(dto.getPassword())
                 .email(dto.getEmail())
@@ -40,6 +42,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(String uid) {
         return userRepository.getUserByUid(uid);
+    }
+
+    @Override
+    public List<UserVo> getUsers(List<Long> userIds) {
+        return userRepository.getUsersById(userIds);
     }
 
     @Override
@@ -64,7 +71,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String uid) {
-        userRepository.deleteUser(uid);
+        Optional<User> user = Optional.ofNullable(userRepository.getUserByUid(uid));
+        user.ifPresent(value -> userRepository.deleteUser(value.getId()));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package cc.demo.order.repository;
 
 import cc.demo.order.model.User;
+import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -32,6 +33,17 @@ public class UserRepositoryImpl implements UserRepository{
     }
 
     @Override
+    public List<UserVo> getUsersById(List<Long> userIds) {
+        String sql = """
+                select uid as user_uid, user_name, email from user where id in (:userIds);
+                """;
+
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("userIds", userIds);
+
+        return template.query(sql, namedParameters, new BeanPropertyRowMapper<>(UserVo.class));
+    }
+
+    @Override
     public int createUser(User user) {
         String sql = """
                 INSERT INTO user (uid, user_name, passwd, email, user_status, create_time)
@@ -54,12 +66,12 @@ public class UserRepositoryImpl implements UserRepository{
     }
 
     @Override
-    public int deleteUser(String uid) {
+    public int deleteUser(Long id) {
         String sql = """
-                DELETE FROM user WHERE uid = :uid
+                DELETE FROM user WHERE id = :id
                 """;
 
-        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("uid", uid);
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("id", id);
 
         return template.update(sql, namedParameters);
     }
