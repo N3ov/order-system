@@ -1,11 +1,10 @@
-package cc.demo.order.service.user.impl;
+package cc.demo.order.service.user;
 
 import cc.demo.order.controller.user.dto.UserReqDto;
 import cc.demo.order.infra.enums.UserStatusEnum;
 import cc.demo.order.infra.util.UidUtil;
 import cc.demo.order.model.User;
 import cc.demo.order.repository.UserRepository;
-import cc.demo.order.service.user.UserService;
 import cc.demo.order.vo.UserInfoVo;
 import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;

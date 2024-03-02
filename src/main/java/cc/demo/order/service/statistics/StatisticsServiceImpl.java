@@ -5,14 +5,12 @@ import cc.demo.order.service.user.UserService;
 import cc.demo.order.vo.OrderCalculateVo;
 import cc.demo.order.vo.StatisticsVo;
 import cc.demo.order.vo.UserInfoVo;
-import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service

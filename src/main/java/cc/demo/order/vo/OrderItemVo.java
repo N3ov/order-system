@@ -3,7 +3,6 @@ package cc.demo.order.vo;
 import lombok.Builder;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
