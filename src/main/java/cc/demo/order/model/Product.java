@@ -1,24 +1,26 @@
-package cc.demo.order.vo;
+package cc.demo.order.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ProductVo {
+public class Product {
     private long productId;
 
     private String productName;
 
-    private String productDesc;
-
     private BigDecimal price;
 
     private int productStatus;
+
+    private String productDesc;
+
+    private Date createTime;
+
+    private Date updateTime;
+
 }
