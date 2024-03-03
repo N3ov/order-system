@@ -2,18 +2,24 @@ package cc.demo.order.service.user;
 
 import cc.demo.order.controller.user.dto.UserReqDto;
 import cc.demo.order.infra.enums.UserStatusEnum;
+import cc.demo.order.infra.exception.UserException;
 import cc.demo.order.infra.util.UidUtil;
 import cc.demo.order.model.User;
 import cc.demo.order.repository.UserRepository;
+import cc.demo.order.repository.UserRoleRepository;
 import cc.demo.order.vo.UserInfoVo;
 import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -22,9 +28,13 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserRepository userRepository;
+    private final UserRoleRepository userRoleRepository;
 
+    @Transactional
+    @CachePut(value = "userCache", key = "#result.uid", unless = "#result == null")
     @Override
     public User createUser(UserReqDto dto) {
 
@@ -37,7 +47,20 @@ public class UserServiceImpl implements UserService {
                 .createTime(new Date())
                 .build();
 
-        userRepository.createUser(user);
+        int count = userRepository.createUser(user);
+        if (count == 0) {
+            LOGGER.info("User Create Failed, user name: [{}]", dto.getUserName());
+            throw new UserException(1, "USER CREATE FAILED");
+        }
+
+        UserVo u = userRepository.getUserByUsername(dto.getUserName());
+
+        count = userRoleRepository.createUserRole(u.getId());
+        if (count == 0) {
+            LOGGER.info("User Create Role Failed, user name: [{}]", dto.getUserName());
+            throw new UserException(2, "USER CREATE ROLE FAILED");
+        }
+
         return user;
     }
 
@@ -47,6 +70,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.getUserByUid(uid);
     }
 
+    @Cacheable(value = "userCache", key = "#result.uid", unless = "#result == null")
     @Override
     public UserVo getUserByName(String name) {
         return userRepository.getUserByUsername(name);
@@ -57,6 +81,8 @@ public class UserServiceImpl implements UserService {
         return userRepository.getUsersById(userIds);
     }
 
+    @CacheEvict(value = "userCache", key = "#uid")
+    @Transactional
     @Override
     public void updateUser(String uid, UserReqDto dto) {
         Optional<UserVo> currentUser = Optional.ofNullable(userRepository.getUserByUid(uid));
@@ -73,7 +99,11 @@ public class UserServiceImpl implements UserService {
                 user.setEmail(dto.getEmail());
             }
 
-            userRepository.updateUser(user);
+            int count = userRepository.updateUser(user);
+            if (count == 0) {
+                LOGGER.info("User Update Failed, user name: [{}]", dto.getUserName());
+                throw new UserException(3, "USER UPDATE FAILED");
+            }
         }
     }
 

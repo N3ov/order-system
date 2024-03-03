@@ -14,6 +14,7 @@ public interface UserService {
     User createUser(UserReqDto dto);
 
     UserVo getUserByUid(String uid);
+
     UserVo getUserByName(String name);
 
     List<UserInfoVo> getUsers(List<Long> userIds);
