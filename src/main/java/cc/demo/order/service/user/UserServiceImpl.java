@@ -8,6 +8,7 @@ import cc.demo.order.model.User;
 import cc.demo.order.repository.UserRepository;
 import cc.demo.order.repository.UserRoleRepository;
 import cc.demo.order.vo.UserInfoVo;
+import cc.demo.order.vo.UserRoleVo;
 import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static cc.demo.order.infra.constants.UserErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +51,7 @@ public class UserServiceImpl implements UserService {
         int count = userRepository.createUser(user);
         if (count == 0) {
             LOGGER.info("User Create Failed, user name: [{}]", dto.getUserName());
-            throw new UserException(1, "USER CREATE FAILED");
+            throw new UserException(USER_CREATE_FAILED.getCode(), USER_CREATE_FAILED.getMessage());
         }
 
         UserVo u = userRepository.getUserByUsername(dto.getUserName());
@@ -56,7 +59,7 @@ public class UserServiceImpl implements UserService {
         count = userRoleRepository.createUserRole(u.getId());
         if (count == 0) {
             LOGGER.info("User Create Role Failed, user name: [{}]", dto.getUserName());
-            throw new UserException(2, "USER CREATE ROLE FAILED");
+            throw new UserException(USER_CREATE_ROLE_FAILED.getCode(), USER_CREATE_ROLE_FAILED.getMessage());
         }
 
         return user;
@@ -70,8 +73,8 @@ public class UserServiceImpl implements UserService {
 
     @Cacheable(value = "userCache", key = "#name", unless = "#result == null")
     @Override
-    public UserVo getUserByName(String name) {
-        return userRepository.getUserByUsername(name);
+    public UserRoleVo getUserByName(String name) {
+        return userRoleRepository.getUserRoleByName(name);
     }
 
     @Override
@@ -99,16 +102,26 @@ public class UserServiceImpl implements UserService {
             int count = userRepository.updateUser(user);
             if (count == 0) {
                 LOGGER.info("User Update Failed, user name: [{}]", dto.getUserName());
-                throw new UserException(3, "USER UPDATE FAILED");
+                throw new UserException(USER_UPDATE_FAILED.getCode(), USER_UPDATE_FAILED.getMessage());
             }
         }
     }
 
     @CacheEvict(value = "userCache", key = "#uid")
+    @Transactional
     @Override
     public void deleteUser(String uid) {
         Optional<UserVo> user = Optional.ofNullable(userRepository.getUserByUid(uid));
-        user.ifPresent(value -> userRepository.deleteUser(value.getId()));
+        user.ifPresent(u -> {
+            int count = userRoleRepository.deleteUserRole(u.getId());
+            if (count == 0) {
+                throw new UserException(USER_DELETE_ROLE_FAILED.getCode(), USER_DELETE_ROLE_FAILED.getMessage());
+            }
+            count = userRepository.deleteUser(u.getId());
+            if (count == 0) {
+                throw new UserException(USER_DELETE_FAILED.getCode(), USER_DELETE_FAILED.getMessage());
+            }
+        });
     }
 
     @Override

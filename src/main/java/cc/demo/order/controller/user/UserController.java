@@ -37,14 +37,16 @@ public class UserController {
                         .build());
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public ResponseDto<?> update(@RequestParam String uid, UserReqDto dto) {
         userService.updateUser(uid, dto);
         return ResponseDto.success();
     }
 
-    public void delete(String uid) {
+    @DeleteMapping
+    public ResponseDto<?> delete(@RequestParam String uid) {
         userService.deleteUser(uid);
+        return ResponseDto.success();
     }
 
     @GetMapping
