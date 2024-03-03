@@ -165,12 +165,6 @@
                                  referencedColumnNames="product_id"/>
     </changeSet>
 
-    <changeSet id="addForeignKeyOrderInfoUser" author="jc">
-        <addForeignKeyConstraint baseTableName="order_info" baseColumnNames="user_id"
-                                 constraintName="FK_order_info_user" referencedTableName="user"
-                                 referencedColumnNames="id"/>
-    </changeSet>
-
     <changeSet id="addUniqueKeyOrderUid" author="jc">
         <addUniqueConstraint constraintName="UNQ_order_uid" tableName="order_info" columnNames="order_uid" />
     </changeSet>
