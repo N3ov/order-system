@@ -25,12 +25,8 @@ public class OrderPagingVo {
 
     private Date createTime;
 
-    private Date paymentTime;
-
-    private int quantity;
-
     private String productName;
 
-    private BigDecimal price;
+    private int quantity;
 
 }

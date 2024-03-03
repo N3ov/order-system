@@ -5,6 +5,8 @@ import cc.demo.order.controller.order.dto.OrderReqDto;
 import cc.demo.order.dto.OrderItemDto;
 import cc.demo.order.infra.enums.OrderStatusEnum;
 import cc.demo.order.infra.enums.ProductStatusEnum;
+import cc.demo.order.infra.exception.OrderException;
+import cc.demo.order.infra.exception.UserException;
 import cc.demo.order.infra.util.UidUtil;
 import cc.demo.order.model.OrderInfo;
 import cc.demo.order.model.OrderItem;
@@ -13,10 +15,9 @@ import cc.demo.order.repository.OrderItemRepository;
 import cc.demo.order.service.product.ProductService;
 import cc.demo.order.service.user.UserService;
 import cc.demo.order.vo.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     private final UserService userService;
     private final ProductService productService;
@@ -39,21 +41,42 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public OrderInfoVo createOrder(OrderReqDto dto) {
+
         String uid = UidUtil.generateUid(15);
         Date now = new Date();
         int orderStatus = OrderStatusEnum.UNPAID.getCode();
-        List<OrderItemDto> orderItemDtoList = convertItems(dto.getProducts());
 
-        List<Long> productIds = orderItemDtoList.stream().map(OrderItemDto::getProductId).collect(Collectors.toList());
+        // check user
+        Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(dto.getUserUid()));
+        if (user.isEmpty()) {
+            LOGGER.info("Uid: [{}], User not exit", dto.getUserUid());
+            throw new UserException(0, "User not exit");
+        }
+        LOGGER.info("Uid:[{}] user checked", dto.getUserUid());
 
-        Map<Long, ProductVo> productVoMap = productService.getProducts(productIds).stream()
+        Map<Long, OrderItemDto> orderItemDtoMap = dto.getProducts().stream().collect(Collectors.toMap(OrderItemDto::getProductId, p -> p));
+        // check product
+        List<Long> productIds = dto.getProducts().stream().map(OrderItemDto::getProductId).collect(Collectors.toList());
+        List<ProductVo> productVos = productService.getProducts(productIds);
+        Map<Long, ProductVo> productVoMap = productVos.stream()
                 .filter(p -> ProductStatusEnum.AVAILABLE.getCode().equals(p.getProductStatus()))
+                .filter(p -> p.getCount() > orderItemDtoMap.get(p.getProductId()).getQuantity())
                 .collect(Collectors.toMap(ProductVo::getProductId, p -> p));
+        if (productVoMap.isEmpty()) {
+            LOGGER.info("products: [{}], Products not exit", dto.getProducts());
+            throw new UserException(1, "Product not exit");
+        }
+        LOGGER.info("Products: [{}] checked", productIds);
 
-        List<OrderItem> orderItems = orderItemDtoList.stream()
+        // TODO optimize this
+        //product reduce count
+        productVos.forEach(p -> productService.reduceCount(orderItemDtoMap.get(p.getProductId()).getQuantity(), p.getProductId(), p.getVersion()));
+
+        List<OrderItem> orderItems = dto.getProducts().stream()
                 .filter(orderItemDto ->
                         productVoMap.containsKey(orderItemDto.getProductId())
                                 && productVoMap.get(orderItemDto.getProductId()).getProductStatus() == ProductStatusEnum.AVAILABLE.getCode()
+                                && productVoMap.get(orderItemDto.getProductId()).getCount() > orderItemDto.getQuantity()
                 ).map(orderItemDto -> {
                     ProductVo productVo = productVoMap.get(orderItemDto.getProductId());
                     return OrderItem.builder()
@@ -64,30 +87,12 @@ public class OrderServiceImpl implements OrderService {
                             .build();
                 }).toList();
 
-        Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(dto.getUserUid()));
+        // calculate price
+        BigDecimal totalPrice = getTotalPrice(dto, productVoMap, orderItems);
 
-        BigDecimal totalPrice = orderItems.stream()
-                .mapToDouble(orderItem -> {
-                    BigDecimal quantity = BigDecimal.valueOf(orderItem.getQuantity());
-                    BigDecimal pricePerUnit = productVoMap.get(orderItem.getProductId()).getPrice();
-                    return quantity.multiply(pricePerUnit).doubleValue();
-                })
-                .mapToObj(BigDecimal::valueOf)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        if (!orderItems.isEmpty() && user.isPresent()) {
-            orderInfoRepository.createOrder(
-                    OrderInfo.builder()
-                            .orderUid(uid)
-                            .userId(user.get().getId())
-                            .orderStatus(orderStatus)
-                            .totalPrice(totalPrice)
-                            .createTime(now)
-                            .build());
-
-            orderItemRepository.save(orderItems);
+        if (!orderItems.isEmpty()) {
+            createOrder(uid, now, orderStatus, user, orderItems, totalPrice);
         }
-
 
         return OrderInfoVo.builder()
                 .orderUid(uid)
@@ -96,6 +101,35 @@ public class OrderServiceImpl implements OrderService {
                 .orderStatus(orderStatus)
                 .build();
 
+    }
+
+    private static BigDecimal getTotalPrice(OrderReqDto dto, Map<Long, ProductVo> productVoMap, List<OrderItem> orderItems) {
+        BigDecimal totalPrice = orderItems.stream()
+                .map(orderItem -> {
+                    BigDecimal quantity = BigDecimal.valueOf(orderItem.getQuantity());
+                    BigDecimal pricePerUnit = productVoMap.get(orderItem.getProductId()).getPrice();
+                    return quantity.multiply(pricePerUnit).doubleValue();
+                })
+                .map(BigDecimal::valueOf)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        LOGGER.info("Uid:[{}] User totalPrice: [{}]", dto.getUserUid(), totalPrice);
+        return totalPrice;
+    }
+
+    private void createOrder(String uid, Date now, int orderStatus, Optional<UserVo> user, List<OrderItem> orderItems, BigDecimal totalPrice) {
+        int oderInfoCreatedCount = orderInfoRepository.createOrder(
+                OrderInfo.builder()
+                        .orderUid(uid)
+                        .userId(user.get().getId())
+                        .orderStatus(orderStatus)
+                        .totalPrice(totalPrice)
+                        .createTime(now)
+                        .build());
+
+        int orderItemCount = orderItemRepository.save(orderItems);
+        if (oderInfoCreatedCount == 0 || orderItemCount < orderItems.size()) {
+            throw new OrderException(0, "Create order failed");
+        }
     }
 
     @Override
@@ -112,17 +146,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderCalculateVo> getOrderCalculate(int count) {
         return orderInfoRepository.getOrderCalculate(count);
-    }
-
-    private List<OrderItemDto> convertItems(String items) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.readValue(items, new TypeReference<>() {
-            });
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return List.of();
     }
 
     private void checkOderItems() {

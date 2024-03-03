@@ -20,17 +20,17 @@ public class OrderInfoRepository {
 
     private final NamedParameterJdbcTemplate template;
 
-    public void createOrder(OrderInfo order) {
+    public int createOrder(OrderInfo order) {
         String sql = """
                 INSERT INTO order_info (order_uid, user_id, total_price, order_status, create_time)
                 VALUES (:orderUid, :userId, :orderStatus, :totalPrice, :createTime)
                 """;
-        template.update(sql, new BeanPropertySqlParameterSource(order));
+        return template.update(sql, new BeanPropertySqlParameterSource(order));
     }
 
     public List<OrderPagingVo> getOrderPaging(OrderPagingReq dto, long userId) {
         String sql = """
-                select oi.*, oit.quantity, p.product_name, p.price from order_info oi
+                select oi.*, oit.quantity, p.product_name from order_info oi
                 join order_item oit on oit.order_uid = oi.order_uid
                 join product p on p.product_id = oit.product_id
                 where oi.user_id = :userId
@@ -85,7 +85,7 @@ public class OrderInfoRepository {
     }
 
     private static void checkSql(StringBuilder sb) {
-        if(!sb.toString().contains("where")) {
+        if(sb.toString().compareToIgnoreCase("where") <= 0) {
             sb.append(" where");
         } else {
             sb.append(" and");

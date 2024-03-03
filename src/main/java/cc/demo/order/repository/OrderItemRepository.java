@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -18,8 +19,8 @@ public class OrderItemRepository {
     private final NamedParameterJdbcTemplate template;
     private final Integer BATCH_SIZE = 5;
 
-    public void save(List<OrderItem> orderItems) {
-
+    public int save(List<OrderItem> orderItems) {
+        int count = 0;
         Date now = new Date();
         String sql = """
                 INSERT INTO order_item (order_uid, product_id, quantity, create_time)
@@ -35,11 +36,15 @@ public class OrderItemRepository {
 
             args.add(source);
             if (args.size() >= BATCH_SIZE) {
-                template.batchUpdate(sql, args.toArray(new SqlParameterSource[0]));
+                int[] updateSize = template.batchUpdate(sql, args.toArray(new SqlParameterSource[0]));
+                count += Arrays.stream(updateSize).sum();
                 args.clear();
             }
         }
 
-        template.batchUpdate(sql, args.toArray(new SqlParameterSource[0]));
+        int[] updateSize = template.batchUpdate(sql, args.toArray(new SqlParameterSource[0]));
+        count += Arrays.stream(updateSize).sum();
+
+        return count;
     }
 }
