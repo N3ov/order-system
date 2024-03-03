@@ -64,7 +64,7 @@ public class OrderInfoRepository {
                 });
 
         sb.append(" LIMIT :limit OFFSET :offset");
-        params.addValue("offset", dto.getPage());
+        params.addValue("offset", dto.getPage() * dto.getSize());
         params.addValue("limit", dto.getSize());
 
         return template.query(sb.toString(), params, new BeanPropertyRowMapper<>(OrderPagingVo.class));
@@ -85,7 +85,7 @@ public class OrderInfoRepository {
     }
 
     private static void checkSql(StringBuilder sb) {
-        if(sb.toString().compareToIgnoreCase("where") <= 0) {
+        if(!sb.toString().contains("where")) {
             sb.append(" where");
         } else {
             sb.append(" and");
