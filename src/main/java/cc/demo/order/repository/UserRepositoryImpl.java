@@ -34,6 +34,17 @@ public class UserRepositoryImpl implements UserRepository{
     }
 
     @Override
+    public UserVo getUserByUsername(String username) {
+        String sql = """
+                select * from user where user_name = :username;
+                """;
+
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("username", username);
+
+        return template.queryForObject(sql, namedParameters, new BeanPropertyRowMapper<>(UserVo.class));
+    }
+
+    @Override
     public List<UserInfoVo> getUsersById(List<Long> userIds) {
         String sql = """
                 select uid, user_name, email, create_time from user where id in (:userIds);

@@ -64,7 +64,7 @@ public class OrderServiceImpl implements OrderService {
                             .build();
                 }).toList();
 
-        Optional<UserVo> user = Optional.ofNullable(userService.getUser(dto.getUserUid()));
+        Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(dto.getUserUid()));
 
         BigDecimal totalPrice = orderItems.stream()
                 .mapToDouble(orderItem -> {
@@ -101,7 +101,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<List<OrderPagingVo>> getOrderPaging(OrderPagingReq dto) {
 
-        Optional<UserVo> user = Optional.ofNullable(userService.getUser(dto.getUserUid()));
+        Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(dto.getUserUid()));
         if (user.isPresent()) {
             List<OrderPagingVo> pageResult = orderInfoRepository.getOrderPaging(dto, user.get().getId());
             return new PageImpl<>(Collections.singletonList(pageResult));

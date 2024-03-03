@@ -49,7 +49,7 @@ public class UserController {
 
     @GetMapping
     public ResponseDto<UserRespDto> getUser(@RequestParam @NotBlank String uid) {
-        UserVo user = userService.getUser(uid);
+        UserVo user = userService.getUserByUid(uid);
         return ResponseDto.<UserRespDto>success(
                 UserRespDto.builder()
                         .uid(user.getUid())

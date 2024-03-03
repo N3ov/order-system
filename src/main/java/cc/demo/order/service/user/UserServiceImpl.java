@@ -43,8 +43,13 @@ public class UserServiceImpl implements UserService {
 
     @Cacheable(value = "userCache", key = "#uid", unless = "#result == null")
     @Override
-    public UserVo getUser(String uid) {
+    public UserVo getUserByUid(String uid) {
         return userRepository.getUserByUid(uid);
+    }
+
+    @Override
+    public UserVo getUserByName(String name) {
+        return userRepository.getUserByUsername(name);
     }
 
     @Override
