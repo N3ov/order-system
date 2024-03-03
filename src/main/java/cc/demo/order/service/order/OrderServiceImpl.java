@@ -6,6 +6,7 @@ import cc.demo.order.dto.OrderItemDto;
 import cc.demo.order.infra.enums.OrderStatusEnum;
 import cc.demo.order.infra.enums.ProductStatusEnum;
 import cc.demo.order.infra.exception.OrderException;
+import cc.demo.order.infra.exception.ProductException;
 import cc.demo.order.infra.exception.UserException;
 import cc.demo.order.infra.util.UidUtil;
 import cc.demo.order.model.OrderInfo;
@@ -26,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static cc.demo.order.infra.constants.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static cc.demo.order.infra.constants.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
         Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(dto.getUserUid()));
         if (user.isEmpty()) {
             LOGGER.info("Uid: [{}], User not exit", dto.getUserUid());
-            throw new UserException(0, "User not exit");
+            throw new UserException(USER_NOT_FOUND.getCode(), USER_NOT_FOUND.getMessage());
         }
         LOGGER.info("Uid:[{}] user checked", dto.getUserUid());
 
@@ -64,7 +68,7 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toMap(ProductVo::getProductId, p -> p));
         if (productVoMap.isEmpty()) {
             LOGGER.info("products: [{}], Products not exit", dto.getProducts());
-            throw new UserException(1, "Product not exit");
+            throw new ProductException(PRODUCT_NOT_FOUND.getCode(), PRODUCT_NOT_FOUND.getMessage());
         }
         LOGGER.info("Products: [{}] checked", productIds);
 
@@ -146,8 +150,5 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderCalculateVo> getOrderCalculate(int count) {
         return orderInfoRepository.getOrderCalculate(count);
-    }
-
-    private void checkOderItems() {
     }
 }

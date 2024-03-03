@@ -28,7 +28,7 @@ public class UserController {
     @PostMapping("/create")
     public ResponseDto<UserRespDto> create(@Valid @RequestBody UserReqDto userDto) {
         User user = userService.createUser(userDto);
-        return ResponseDto.<UserRespDto>success(
+        return ResponseDto.success(
                 UserRespDto.builder()
                         .userName(user.getUserName())
                         .uid(user.getUid())
@@ -52,7 +52,7 @@ public class UserController {
     @GetMapping
     public ResponseDto<UserRespDto> getUser(@RequestParam @NotBlank String uid) {
         UserVo user = userService.getUserByUid(uid);
-        return ResponseDto.<UserRespDto>success(
+        return ResponseDto.success(
                 UserRespDto.builder()
                         .uid(user.getUid())
                         .userName(user.getUserName())
