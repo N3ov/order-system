@@ -50,6 +50,15 @@
             <column name="price" type="DECIMAL(19,2)">
                 <constraints nullable="true"/>
             </column>
+            <column name="count" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sale" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
             <column name="product_status" type="INT" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
@@ -172,5 +181,18 @@
                                  constraintName="FK_order_item_order_info"
                                  referencedTableName="order_info"
                                  referencedColumnNames="order_uid"/>
+    </changeSet>
+
+    <changeSet id="insertAdminUser" author="jc">
+        <sql>INSERT INTO `user` (uid, user_name, passwd, email, user_status, create_time)
+            VALUES ('ADMIN', 'ADMIN', 'ADMIN', '', 0, NOW());</sql>
+    </changeSet>
+
+    <changeSet id="insertAdminRole" author="jc">
+        <sql>
+            INSERT INTO demo.user_role
+            (user_id, role_name)
+            VALUES(1, 'ROLE_ADMIN');
+        </sql>
     </changeSet>
 </databaseChangeLog>
