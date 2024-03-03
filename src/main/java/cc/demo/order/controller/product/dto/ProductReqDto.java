@@ -11,4 +11,5 @@ public class ProductReqDto {
     String productName;
     String productPrice;
     String productDesc;
+    Integer count;
 }

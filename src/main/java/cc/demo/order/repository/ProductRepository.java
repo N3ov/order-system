@@ -35,13 +35,27 @@ public class ProductRepository {
         return template.query(sql, new BeanPropertyRowMapper<>(ProductVo.class));
     }
 
-    public void create(Product product) {
+    public int create(Product product) {
         String sql = """
-                INSERT INTO product (product_id, product_name, price, product_status, product_desc, create_time)
-                VALUES (:productId, :productName, :price, :productStatus, :productDesc, :createTime)
+                INSERT INTO product (product_id, product_name, price, count, product_status, product_desc, create_time)
+                VALUES (:productId, :productName, :price, :count, :productStatus, :productDesc, :createTime)
                 """;
 
-        template.update(sql, new BeanPropertySqlParameterSource(product));
+        return template.update(sql, new BeanPropertySqlParameterSource(product));
     }
+
+    public int updateCountAndVersion(int count, long productId, int version) {
+        String sql = """
+                UPDATE product SET count = (count - :count), sale = (sale + :count), version = :version + 1
+                WHERE product_id = :productId AND version = :version
+                """;
+        SqlParameterSource map =  new MapSqlParameterSource()
+                .addValue("count", count)
+                .addValue("productId", productId)
+                .addValue("version", version);
+
+        return template.update(sql, map);
+    }
+
 
 }

@@ -20,5 +20,11 @@ public class ProductVo {
 
     private BigDecimal price;
 
+    private Integer count;
+
+    private Integer sale;
+
+    private Integer version;
+
     private int productStatus;
 }

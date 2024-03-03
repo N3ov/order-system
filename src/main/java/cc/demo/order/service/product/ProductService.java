@@ -13,4 +13,7 @@ public interface ProductService {
     List<ProductVo> getProducts(List<Long> productIds);
 
     List<ProductVo> getAllProduct();
+
+    void reduceCount(int count, long productId, int version);
+
 }
