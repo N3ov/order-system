@@ -23,7 +23,7 @@ public class OrderInfoRepository {
     public int createOrder(OrderInfo order) {
         String sql = """
                 INSERT INTO order_info (order_uid, user_id, total_price, order_status, create_time)
-                VALUES (:orderUid, :userId, :orderStatus, :totalPrice, :createTime)
+                VALUES (:orderUid, :userId, :totalPrice, :orderStatus, :createTime)
                 """;
         return template.update(sql, new BeanPropertySqlParameterSource(order));
     }

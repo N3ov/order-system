@@ -91,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalPrice = getTotalPrice(dto, productVoMap, orderItems);
 
         if (!orderItems.isEmpty()) {
-            createOrder(uid, now, orderStatus, user, orderItems, totalPrice);
+            createOrder(uid, now, orderStatus, user.get(), orderItems, totalPrice);
         }
 
         return OrderInfoVo.builder()
@@ -116,11 +116,11 @@ public class OrderServiceImpl implements OrderService {
         return totalPrice;
     }
 
-    private void createOrder(String uid, Date now, int orderStatus, Optional<UserVo> user, List<OrderItem> orderItems, BigDecimal totalPrice) {
+    private void createOrder(String uid, Date now, int orderStatus, UserVo user, List<OrderItem> orderItems, BigDecimal totalPrice) {
         int oderInfoCreatedCount = orderInfoRepository.createOrder(
                 OrderInfo.builder()
                         .orderUid(uid)
-                        .userId(user.get().getId())
+                        .userId(user.getId())
                         .orderStatus(orderStatus)
                         .totalPrice(totalPrice)
                         .createTime(now)
