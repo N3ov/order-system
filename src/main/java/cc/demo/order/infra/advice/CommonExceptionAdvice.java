@@ -1,4 +1,4 @@
-package cc.demo.order.infra.exception;
+package cc.demo.order.infra.advice;
 
 import cc.demo.order.infra.response.ResponseErrorDto;
 import cc.demo.order.infra.response.ResponseFailDto;
