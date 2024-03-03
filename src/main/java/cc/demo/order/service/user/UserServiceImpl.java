@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -34,14 +33,13 @@ public class UserServiceImpl implements UserService {
     private final UserRoleRepository userRoleRepository;
 
     @Transactional
-    @CachePut(value = "userCache", key = "#result.uid", unless = "#result == null")
     @Override
     public User createUser(UserReqDto dto) {
 
         User user = User.builder()
                 .uid(UidUtil.generateUid(9))
                 .userName(dto.getUserName())
-                .password(dto.getPassword())
+                .passwd(dto.getPassword())
                 .email(dto.getEmail())
                 .userStatus(UserStatusEnum.ACTIVE.getValue())
                 .createTime(new Date())
@@ -70,7 +68,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.getUserByUid(uid);
     }
 
-    @Cacheable(value = "userCache", key = "#result.uid", unless = "#result == null")
+    @Cacheable(value = "userCache", key = "#name", unless = "#result == null")
     @Override
     public UserVo getUserByName(String name) {
         return userRepository.getUserByUsername(name);
@@ -81,7 +79,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.getUsersById(userIds);
     }
 
-    @CacheEvict(value = "userCache", key = "#uid")
     @Transactional
     @Override
     public void updateUser(String uid, UserReqDto dto) {
@@ -92,8 +89,8 @@ public class UserServiceImpl implements UserService {
             if (!dto.getUserName().isBlank() && !dto.getUserName().equals(currentUser.get().getUserName())) {
                 user.setUserName(dto.getUserName());
             }
-            if (!dto.getPassword().isBlank() && !dto.getPassword().equals(currentUser.get().getPassword())) {
-                user.setPassword(dto.getPassword());
+            if (!dto.getPassword().isBlank() && !dto.getPassword().equals(currentUser.get().getPasswd())) {
+                user.setPasswd(dto.getPassword());
             }
             if (!dto.getEmail().isBlank() && !dto.getEmail().equals(currentUser.get().getEmail())) {
                 user.setEmail(dto.getEmail());

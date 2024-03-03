@@ -34,12 +34,12 @@ public class UserRepositoryImpl implements UserRepository{
     }
 
     @Override
-    public UserVo getUserByUsername(String username) {
+    public UserVo getUserByUsername(String userName) {
         String sql = """
-                select * from user where user_name = :username;
+                select * from user where user_name = :user_name;
                 """;
 
-        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("username", username);
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("user_name", userName);
 
         return template.queryForObject(sql, namedParameters, new BeanPropertyRowMapper<>(UserVo.class));
     }
@@ -59,7 +59,7 @@ public class UserRepositoryImpl implements UserRepository{
     public int createUser(User user) {
         String sql = """
                 INSERT INTO user (uid, user_name, passwd, email, user_status, create_time)
-                VALUES (:uid, :userName, :password, :email, :userStatus, :createTime)
+                VALUES (:uid, :userName, :passwd, :email, :userStatus, :createTime)
                 """;
 
         return template.update(sql, new BeanPropertySqlParameterSource(user));

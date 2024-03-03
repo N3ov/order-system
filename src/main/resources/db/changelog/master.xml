@@ -5,30 +5,30 @@
 
     <changeSet id="createUserTable" author="jc">
         <preConditions onFail="MARK_RAN">
-        <not>
-            <tableExists tableName="user"/>
-        </not>
+            <not>
+                <tableExists tableName="user"/>
+            </not>
         </preConditions>
         <createTable tableName="user">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="uid" type="VARCHAR(10)">
+            <column name="uid" type="varchar(10)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="user_name" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="user_name" type="VARCHAR(50)">
+            <column name="passwd" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="passwd" type="VARCHAR(50)">
+            <column name="email" type="varchar(100)">
                 <constraints nullable="false"/>
             </column>
-            <column name="email" type="VARCHAR(100)">
+            <column name="user_status" type="int" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
-            <column name="user_status" type="INT" defaultValue="0">
-                <constraints nullable="false"/>
-            </column>
-            <column name="create_time" type="DATETIME">
+            <column name="create_time" type="datetime">
                 <constraints nullable="true"/>
             </column>
         </createTable>

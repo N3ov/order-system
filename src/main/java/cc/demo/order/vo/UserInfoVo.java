@@ -15,6 +15,6 @@ public class UserInfoVo {
     private static final long serialVersionUID = 456789L; // 任何long值都可以
     private String uid;
     private String userName;
-    private int status;
+    private int userStatus;
     private Date createTime;
 }

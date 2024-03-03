@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -15,14 +14,13 @@ import java.util.Date;
 @NoArgsConstructor
 public class UserVo implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 123456789L; // 任何long值都可以
+    private static final long serialVersionUID = 1456789L;
 
     private long id;
     private String uid;
     private String userName;
-    private String password;
+    private String passwd;
     private String email;
-    private int status;
+    private int userStatus;
     private Date createTime;
 }

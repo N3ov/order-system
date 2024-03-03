@@ -54,7 +54,7 @@ public class UserController {
                 UserRespDto.builder()
                         .uid(user.getUid())
                         .userName(user.getUserName())
-                        .userStatus(user.getStatus())
+                        .userStatus(user.getUserStatus())
                         .createTime(user.getCreateTime())
                         .build()
         );
