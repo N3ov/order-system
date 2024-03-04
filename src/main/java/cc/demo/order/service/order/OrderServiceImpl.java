@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static cc.demo.order.infra.constants.OrderErrorCode.ORDER_CREATE_FAILED;
 import static cc.demo.order.infra.constants.ProductErrorCode.PRODUCT_COUNT_NOT_ENOUGH;
 import static cc.demo.order.infra.constants.TimeErrorCode.START_DATE_AFTER_END_DATE;
 import static cc.demo.order.infra.constants.UserErrorCode.USER_NOT_FOUND;
@@ -141,7 +142,8 @@ public class OrderServiceImpl implements OrderService {
 
         int orderItemCount = orderItemRepository.save(orderItems);
         if (oderInfoCreatedCount == 0 || orderItemCount < orderItems.size()) {
-            throw new OrderException(0, "Create order failed");
+            LOGGER.info("Order info insert: [{}], orderItem insert: [{}], orderItems: [{}]", oderInfoCreatedCount, orderItemCount, orderItems);
+            throw new OrderException(ORDER_CREATE_FAILED.getCode(), ORDER_CREATE_FAILED.getMessage());
         }
     }
 
