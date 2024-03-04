@@ -99,7 +99,7 @@ public class UserRepositoryImpl implements UserRepository{
                 """;
 
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("offset", offset)
+                .addValue("offset", offset * limit)
                 .addValue("limit", limit);
 
         List<User> users = template.query(sql, namedParameters, new BeanPropertyRowMapper<>(User.class));

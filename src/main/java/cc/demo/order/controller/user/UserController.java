@@ -64,7 +64,8 @@ public class UserController {
 
     @GetMapping("/page")
     public ResponseDto<Page<User>> getUserPaging(@RequestParam Pagination page) {
-        Pageable pageable = PageRequest.of(page.getPage(), page.getSize(), Sort.by("id").descending());        Page<User> userPage = userService.findUserPaging(pageable);
+        Pageable pageable = PageRequest.of(page.getPage(), page.getSize(), Sort.by("id").descending());
+        Page<User> userPage = userService.findUserPaging(pageable);
         return ResponseDto.success(userPage);
     }
 
