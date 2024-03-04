@@ -47,7 +47,7 @@ public class UserRepositoryImpl implements UserRepository{
     @Override
     public List<UserInfoVo> getUsersById(List<Long> userIds) {
         String sql = """
-                select uid, user_name, email, create_time from user where id in (:userIds);
+                select id, uid, user_name, email, create_time from user where id in (:userIds);
                 """;
 
         SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("userIds", userIds);

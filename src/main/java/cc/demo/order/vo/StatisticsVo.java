@@ -3,10 +3,13 @@ package cc.demo.order.vo;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 @Builder
-public class StatisticsVo<T> {
+public class StatisticsVo<M extends Map<Long, ?>, T> {
 
-    T users;
+    M users;
+    T data;
 
 }

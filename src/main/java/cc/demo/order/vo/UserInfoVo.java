@@ -12,7 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserInfoVo {
-    private static final long serialVersionUID = 456789L; // 任何long值都可以
+    private long id;
     private String uid;
     private String userName;
     private int userStatus;
