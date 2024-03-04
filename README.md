@@ -7,6 +7,12 @@ Order create process
 # Timeline
 3/1 
 1. start project and setup env
+2. design the db schema ver.1
+3. service -> spring boot 3
+4. ORM -> mybatis
+5. DB -> mySQL + redis
+6. cache -> spring cache + redis
+
 
 3/2 
 1. check mybatis not support spring boot 3 
@@ -29,12 +35,15 @@ Order create process
 
 3/4
 1. add login api and return jwt token
+2. add customer advice
+3. fix page sql
 
 # TODO
 1. add security for api user
 2. optimize create order api
 3. add message queue for order creating
 4. repository interface abstraction
+5. add unit test
 
 # Swagger
 http://localhost:8080/swagger-ui/index.html#/
