@@ -8,6 +8,7 @@ import cc.demo.order.infra.enums.ProductStatusEnum;
 import cc.demo.order.infra.exception.OrderException;
 import cc.demo.order.infra.exception.ProductException;
 import cc.demo.order.infra.exception.UserException;
+import cc.demo.order.infra.util.DateUtil;
 import cc.demo.order.infra.util.UidUtil;
 import cc.demo.order.model.OrderInfo;
 import cc.demo.order.model.OrderItem;
@@ -15,7 +16,10 @@ import cc.demo.order.repository.OrderInfoRepository;
 import cc.demo.order.repository.OrderItemRepository;
 import cc.demo.order.service.product.ProductService;
 import cc.demo.order.service.user.UserService;
-import cc.demo.order.vo.*;
+import cc.demo.order.vo.OrderInfoVo;
+import cc.demo.order.vo.OrderPagingVo;
+import cc.demo.order.vo.ProductVo;
+import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +31,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -153,8 +156,8 @@ public class OrderServiceImpl implements OrderService {
         validTime(dto.getStartTime(), dto.getEndTime());
 
         Pageable page = PageRequest.of(dto.getPage(), dto.getSize());
-        String startTime = getStringDateTime(dto.getStartTime());
-        String endTime = getStringDateTime(dto.getEndTime());
+        String startTime = DateUtil.formatWithSystemTimeZone(dto.getStartTime());
+        String endTime = DateUtil.formatWithSystemTimeZone(dto.getEndTime());
 
         Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(dto.getUserUid()));
 
@@ -169,17 +172,5 @@ public class OrderServiceImpl implements OrderService {
         if (start > end) {
             throw new OrderException(START_DATE_AFTER_END_DATE.getCode(), START_DATE_AFTER_END_DATE.getMessage());
         }
-    }
-
-    private static String getStringDateTime(long timestamp) {
-        Date date = new Date(timestamp);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        format.setTimeZone(TimeZone.getDefault());
-        return format.format(date);
-    }
-
-    @Override
-    public List<OrderCalculateVo> getOrderCalculate(int count) {
-        return orderInfoRepository.getOrderCalculate(count);
     }
 }
