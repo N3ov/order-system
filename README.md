@@ -1,7 +1,10 @@
 # Order System
 Use Optimistic Lock prevent product overselling.
 
-# Time line
+Order create process
+![progress.jpg](img%2Fprogress.jpg)
+
+# Timeline
 3/1 
 1. start project and setup env
 
@@ -57,4 +60,3 @@ liquibase
 
 # Run Test
 To be added
-
