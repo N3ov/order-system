@@ -1,4 +1,4 @@
-package cc.demo.order.dto;
+package cc.demo.order.controller.order.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

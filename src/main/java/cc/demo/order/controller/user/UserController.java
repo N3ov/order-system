@@ -2,7 +2,7 @@ package cc.demo.order.controller.user;
 
 import cc.demo.order.controller.user.dto.UserReqDto;
 import cc.demo.order.controller.user.dto.UserRespDto;
-import cc.demo.order.dto.Pagination;
+import cc.demo.order.infra.page.Pagination;
 import cc.demo.order.infra.response.ResponseDto;
 import cc.demo.order.model.User;
 import cc.demo.order.service.user.UserService;

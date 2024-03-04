@@ -1,6 +1,6 @@
 package cc.demo.order.controller.order.dto;
 
-import cc.demo.order.dto.Pagination;
+import cc.demo.order.infra.page.Pagination;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,5 +19,7 @@ public class OrderPagingReq extends Pagination {
 
     String productName;
 
-    Long buyTime;
+    Long startTime;
+
+    Long EndTime;
 }

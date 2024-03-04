@@ -1,6 +1,5 @@
 package cc.demo.order.controller.order.dto;
 
-import cc.demo.order.dto.OrderItemDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

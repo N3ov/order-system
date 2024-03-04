@@ -25,7 +25,6 @@ public class OrderController {
 
     @GetMapping("/page")
     public ResponseDto<Page<?>> getOrderPaging(OrderPagingReq dto) {
-
         Page<?> orderPaging = orderService.getOrderPaging(dto);
         return ResponseDto.success(orderPaging);
     }

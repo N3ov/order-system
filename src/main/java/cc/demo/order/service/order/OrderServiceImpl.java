@@ -1,8 +1,8 @@
 package cc.demo.order.service.order;
 
+import cc.demo.order.controller.order.dto.OrderItemDto;
 import cc.demo.order.controller.order.dto.OrderPagingReq;
 import cc.demo.order.controller.order.dto.OrderReqDto;
-import cc.demo.order.dto.OrderItemDto;
 import cc.demo.order.infra.enums.OrderStatusEnum;
 import cc.demo.order.infra.enums.ProductStatusEnum;
 import cc.demo.order.infra.exception.OrderException;
@@ -21,14 +21,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static cc.demo.order.infra.constants.ProductErrorCode.PRODUCT_COUNT_NOT_ENOUGH;
+import static cc.demo.order.infra.constants.TimeErrorCode.START_DATE_AFTER_END_DATE;
 import static cc.demo.order.infra.constants.UserErrorCode.USER_NOT_FOUND;
 
 @Service
@@ -51,7 +55,7 @@ public class OrderServiceImpl implements OrderService {
         int orderStatus = OrderStatusEnum.UNPAID.getCode();
 
         // check user
-        UserVo user = getUserVo(dto);
+        UserVo user = getUserVo(dto.getUserUid());
 
         Map<Long, OrderItemDto> orderItemDtoMap = dto.getProducts().stream().collect(Collectors.toMap(OrderItemDto::getProductId, p -> p));
         // check product
@@ -102,13 +106,13 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    private UserVo getUserVo(OrderReqDto dto) {
-        Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(dto.getUserUid()));
+    private UserVo getUserVo(String userId) {
+        Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(userId));
         if (user.isEmpty()) {
-            LOGGER.info("Uid: [{}], User not exit", dto.getUserUid());
+            LOGGER.info("Uid: [{}], User not exit", userId);
             throw new UserException(USER_NOT_FOUND.getCode(), USER_NOT_FOUND.getMessage());
         }
-        LOGGER.info("Uid:[{}] user checked", dto.getUserUid());
+        LOGGER.info("Uid:[{}] user checked", userId);
         return user.get();
     }
 
@@ -144,12 +148,32 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<List<OrderPagingVo>> getOrderPaging(OrderPagingReq dto) {
 
+        validTime(dto.getStartTime(), dto.getEndTime());
+
+        Pageable page = PageRequest.of(dto.getPage(), dto.getSize());
+        String startTime = getStringDateTime(dto.getStartTime());
+        String endTime = getStringDateTime(dto.getEndTime());
+
         Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(dto.getUserUid()));
+
         if (user.isPresent()) {
-            List<OrderPagingVo> pageResult = orderInfoRepository.getOrderPaging(dto, user.get().getId());
+            List<OrderPagingVo> pageResult = orderInfoRepository.getOrderPaging(page, user.get().getId(), dto.getOrderUid(), dto.getProductName(), startTime, endTime);
             return new PageImpl<>(Collections.singletonList(pageResult));
         }
         return new PageImpl<>(Collections.emptyList());
+    }
+
+    private void validTime(long start, long end) {
+        if (start > end) {
+            throw new OrderException(START_DATE_AFTER_END_DATE.getCode(), START_DATE_AFTER_END_DATE.getMessage());
+        }
+    }
+
+    private static String getStringDateTime(long timestamp) {
+        Date date = new Date(timestamp);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        format.setTimeZone(TimeZone.getDefault());
+        return format.format(date);
     }
 
     @Override

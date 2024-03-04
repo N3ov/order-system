@@ -1,10 +1,10 @@
 package cc.demo.order.repository;
 
-import cc.demo.order.controller.order.dto.OrderPagingReq;
 import cc.demo.order.model.OrderInfo;
 import cc.demo.order.vo.OrderCalculateVo;
 import cc.demo.order.vo.OrderPagingVo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -28,7 +28,7 @@ public class OrderInfoRepository {
         return template.update(sql, new BeanPropertySqlParameterSource(order));
     }
 
-    public List<OrderPagingVo> getOrderPaging(OrderPagingReq dto, long userId) {
+    public List<OrderPagingVo> getOrderPaging(Pageable page, long userId,String orderUid, String productName, String startTime, String endTime) {
         String sql = """
                 select oi.*, oit.quantity, p.product_name from order_info oi
                 join order_item oit on oit.order_uid = oi.order_uid
@@ -40,32 +40,32 @@ public class OrderInfoRepository {
 
         StringBuilder sb = new StringBuilder(sql);
 
-        Optional.ofNullable(dto.getOrderUid())
-                .filter(uid -> !uid.isEmpty())
+        Optional.ofNullable(orderUid)
+                .filter(uid -> !uid.isBlank())
                 .ifPresent(uid -> {
                     checkSql(sb);
                     sb.append(" oi.order_uid = :order_uid");
                     params.addValue("order_uid", uid);
                 });
 
-        Optional.ofNullable(dto.getProductName())
-                .filter(name -> !name.isEmpty())
+        Optional.ofNullable(productName)
+                .filter(name -> !name.isBlank())
                 .ifPresent(name -> {
                     checkSql(sb);
                     sb.append(" p.product_name = :productName");
                     params.addValue("productName", name);
                 });
 
-        Optional.ofNullable(dto.getBuyTime())
-                .ifPresent(t -> {
-                    checkSql(sb);
-                    sb.append(" oi.create_time = :buyTime");
-                    params.addValue("buyTime", t);
-                });
+        if (!startTime.isBlank() && !endTime.isBlank()) {
+            checkSql(sb);
+            sb.append(" oi.create_time between :startTime and :endTime");
+            params.addValue("startTime", startTime);
+            params.addValue("endTime", endTime);
+        }
 
         sb.append(" LIMIT :limit OFFSET :offset");
-        params.addValue("offset", dto.getPage() * dto.getSize());
-        params.addValue("limit", dto.getSize());
+        params.addValue("offset", page.getOffset());
+        params.addValue("limit", page.getPageSize());
 
         return template.query(sb.toString(), params, new BeanPropertyRowMapper<>(OrderPagingVo.class));
     }

@@ -1,4 +1,4 @@
-package cc.demo.order.dto;
+package cc.demo.order.infra.page;
 
 import jakarta.validation.constraints.Min;
 import lombok.Data;
