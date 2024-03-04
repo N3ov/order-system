@@ -9,13 +9,14 @@ import cc.demo.order.vo.ProductVo;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import static cc.demo.order.infra.constants.ProductErrorCode.PRODUCT_REDUCED_FAILED;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +44,6 @@ public class ProductServiceImpl implements ProductService {
         LOGGER.info("Product created success");
     }
 
-    @Cacheable(value = "productCache", key = "#productId", unless = "#result == null")
     @Override
     public ProductVo getProduct(int productId) {
         return productRepository.findById(productId);
@@ -63,9 +63,9 @@ public class ProductServiceImpl implements ProductService {
     public void reduceCount(int count, long productId, int version) {
         int updateCount = productRepository.updateCountAndVersion(count, productId, version);
         LOGGER.info("Reduce Count updated: {}", updateCount);
-        if(updateCount == 0) {
+        if (updateCount == 0) {
             LOGGER.info("Reduce Count updated failed");
-            throw new ProductException(1, "Reduce Count updated failed");
+            throw new ProductException(PRODUCT_REDUCED_FAILED.getCode(), PRODUCT_REDUCED_FAILED.getMessage());
         }
     }
 

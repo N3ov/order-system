@@ -1,19 +1,12 @@
 package cc.demo.order.infra.exception;
 
-import lombok.Getter;
+public class OrderException extends AbstractCustomerException {
 
-public class OrderException extends RuntimeException {
-
-    @Getter
-    private final Integer code;
-
-    public OrderException(int code, String message) {
-        super(message);
-        this.code = code;
+    public OrderException(Integer code, String message) {
+        super(code, message);
     }
 
-    public OrderException(int code, String message, Throwable cause) {
-        super(message, cause);
-        this.code = code;
+    public OrderException(Integer code, String message, Throwable cause) {
+        super(code, message, cause);
     }
 }

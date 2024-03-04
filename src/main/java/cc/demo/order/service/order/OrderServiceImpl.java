@@ -28,7 +28,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static cc.demo.order.infra.constants.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static cc.demo.order.infra.constants.ProductErrorCode.PRODUCT_COUNT_NOT_ENOUGH;
 import static cc.demo.order.infra.constants.UserErrorCode.USER_NOT_FOUND;
 
 @Service
@@ -51,12 +51,7 @@ public class OrderServiceImpl implements OrderService {
         int orderStatus = OrderStatusEnum.UNPAID.getCode();
 
         // check user
-        Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(dto.getUserUid()));
-        if (user.isEmpty()) {
-            LOGGER.info("Uid: [{}], User not exit", dto.getUserUid());
-            throw new UserException(USER_NOT_FOUND.getCode(), USER_NOT_FOUND.getMessage());
-        }
-        LOGGER.info("Uid:[{}] user checked", dto.getUserUid());
+        UserVo user = getUserVo(dto);
 
         Map<Long, OrderItemDto> orderItemDtoMap = dto.getProducts().stream().collect(Collectors.toMap(OrderItemDto::getProductId, p -> p));
         // check product
@@ -64,11 +59,11 @@ public class OrderServiceImpl implements OrderService {
         List<ProductVo> productVos = productService.getProducts(productIds);
         Map<Long, ProductVo> productVoMap = productVos.stream()
                 .filter(p -> ProductStatusEnum.AVAILABLE.getCode().equals(p.getProductStatus()))
-                .filter(p -> p.getCount() > orderItemDtoMap.get(p.getProductId()).getQuantity())
+                .filter(p -> p.getCount() >= orderItemDtoMap.get(p.getProductId()).getQuantity())
                 .collect(Collectors.toMap(ProductVo::getProductId, p -> p));
         if (productVoMap.isEmpty()) {
-            LOGGER.info("products: [{}], Products not exit", dto.getProducts());
-            throw new ProductException(PRODUCT_NOT_FOUND.getCode(), PRODUCT_NOT_FOUND.getMessage());
+            LOGGER.info("products: [{}], Products count not enough", dto.getProducts());
+            throw new ProductException(PRODUCT_COUNT_NOT_ENOUGH.getCode(), PRODUCT_COUNT_NOT_ENOUGH.getMessage());
         }
         LOGGER.info("Products: [{}] checked", productIds);
 
@@ -95,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalPrice = getTotalPrice(dto, productVoMap, orderItems);
 
         if (!orderItems.isEmpty()) {
-            createOrder(uid, now, orderStatus, user.get(), orderItems, totalPrice);
+            createOrder(uid, now, orderStatus, user, orderItems, totalPrice);
         }
 
         return OrderInfoVo.builder()
@@ -105,6 +100,16 @@ public class OrderServiceImpl implements OrderService {
                 .orderStatus(orderStatus)
                 .build();
 
+    }
+
+    private UserVo getUserVo(OrderReqDto dto) {
+        Optional<UserVo> user = Optional.ofNullable(userService.getUserByUid(dto.getUserUid()));
+        if (user.isEmpty()) {
+            LOGGER.info("Uid: [{}], User not exit", dto.getUserUid());
+            throw new UserException(USER_NOT_FOUND.getCode(), USER_NOT_FOUND.getMessage());
+        }
+        LOGGER.info("Uid:[{}] user checked", dto.getUserUid());
+        return user.get();
     }
 
     private static BigDecimal getTotalPrice(OrderReqDto dto, Map<Long, ProductVo> productVoMap, List<OrderItem> orderItems) {
