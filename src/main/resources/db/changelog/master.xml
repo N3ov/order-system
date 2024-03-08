@@ -158,23 +158,8 @@
         </createTable>
     </changeSet>
 
-
-    <changeSet id="addForeignKeyOrderItemProduct" author="jc">
-        <addForeignKeyConstraint baseTableName="order_item" baseColumnNames="product_id"
-                                 constraintName="FK_order_item_product" referencedTableName="product"
-                                 referencedColumnNames="product_id"/>
-    </changeSet>
-
     <changeSet id="addUniqueKeyOrderUid" author="jc">
         <addUniqueConstraint constraintName="UNQ_order_uid" tableName="order_info" columnNames="order_uid" />
-    </changeSet>
-
-    <changeSet id="addForeignKeyOrderItemOrderInfo" author="jc">
-        <addForeignKeyConstraint baseTableName="order_item"
-                                 baseColumnNames="order_uid"
-                                 constraintName="FK_order_item_order_info"
-                                 referencedTableName="order_info"
-                                 referencedColumnNames="order_uid"/>
     </changeSet>
 
     <changeSet id="insertAdminUser" author="jc">
