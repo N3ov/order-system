@@ -1,7 +1,5 @@
 package cc.demo.order.service.login;
 
-import cc.demo.order.infra.constants.LoginErrorCode;
-import cc.demo.order.infra.constants.LoginExceptionMessage;
 import cc.demo.order.infra.exception.LoginException;
 import cc.demo.order.infra.jwt.JwtTokenProvider;
 import cc.demo.order.service.user.UserService;
@@ -14,9 +12,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static cc.demo.order.infra.constants.LoginErrorCode.USER_NAME_OR_PASSWORD_ERROR;
+import static cc.demo.order.infra.constants.LoginErrorCode.USER_TOKEN_VERIFY_FAILED;
+
 @Service
 @RequiredArgsConstructor
-public class LoginServiceImpl implements LoginService{
+public class LoginServiceImpl implements LoginService {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtTokenProvider jwtTokenProvider;
@@ -34,7 +35,7 @@ public class LoginServiceImpl implements LoginService{
             Jws<Claims> claims = jwtTokenProvider.parserToken(redisToken.get());
             Claims body = claims.getBody();
             if (!body.getSubject().equals(userVo.getUserName()) || !body.get("auth").equals(role)) {
-                throw new LoginException(LoginErrorCode.USER_TOKEN_VERIFY_FAILED, LoginExceptionMessage.USER_NAME_OR_PASSWORD_NOT_CORRECT);
+                throw new LoginException(USER_TOKEN_VERIFY_FAILED.getCode(), USER_TOKEN_VERIFY_FAILED.getMessage());
             }
         } else {
             String token = jwtTokenProvider.createToken(username, role);
@@ -49,7 +50,7 @@ public class LoginServiceImpl implements LoginService{
     private UserRoleVo validUser(String username, String password) {
         Optional<UserRoleVo> userRoleVo = Optional.ofNullable(userService.getUserByName(username));
         if (userRoleVo.isEmpty() || !userRoleVo.get().getUserName().equals(username) || !userRoleVo.get().getPasswd().equals(password)) {
-            throw new LoginException(LoginErrorCode.USER_NOT_EXIST, LoginExceptionMessage.USER_NAME_OR_PASSWORD_NOT_CORRECT);
+            throw new LoginException(USER_NAME_OR_PASSWORD_ERROR.getCode(), USER_NAME_OR_PASSWORD_ERROR.getMessage());
         }
 
         return userRoleVo.get();

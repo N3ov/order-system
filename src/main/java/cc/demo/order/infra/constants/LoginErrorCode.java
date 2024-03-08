@@ -1,9 +1,17 @@
 package cc.demo.order.infra.constants;
 
-public class LoginErrorCode {
-    public static final Integer USER_NOT_EXIST = 0;
-    public static final Integer USER_NAME_OR_PASSWORD_ERROR = 1;
-    public static final Integer USER_DISABLED = 2;
-    public static final Integer USER_TOKEN_VERIFY_FAILED = 3;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public enum LoginErrorCode {
+    USER_NOT_EXIST(0, "USER_NOT_EXIST"),
+    USER_NAME_OR_PASSWORD_ERROR(1, "USER_NAME_OR_PASSWORD_ERROR"),
+    USER_DISABLED(2,  "USER_DISABLED"),
+    USER_TOKEN_VERIFY_FAILED(3, "USER_TOKEN_VERIFY_FAILED");
+
+    private final Integer code;
+    private final String message;
 
 }
