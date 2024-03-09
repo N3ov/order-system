@@ -1,6 +1,7 @@
-package cc.demo.order.repository;
+package cc.demo.order.repository.impl;
 
 import cc.demo.order.model.User;
+import cc.demo.order.repository.UserRepository;
 import cc.demo.order.vo.UserInfoVo;
 import cc.demo.order.vo.UserVo;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class UserRepositoryImpl implements UserRepository{
+public class UserRepositoryImpl implements UserRepository {
 
     private final NamedParameterJdbcTemplate template;
 

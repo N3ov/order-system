@@ -7,7 +7,7 @@ import cc.demo.order.vo.UserRoleVo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -19,7 +19,7 @@ import static cc.demo.order.infra.constants.LoginErrorCode.USER_TOKEN_VERIFY_FAI
 @RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final StringRedisTemplate redisTemplate;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
 

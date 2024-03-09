@@ -1,6 +1,6 @@
 package cc.demo.order.service.statistics;
 
-import cc.demo.order.repository.OrderInfoRepository;
+import cc.demo.order.repository.impl.OrderInfoRepositoryImpl;
 import cc.demo.order.service.user.UserService;
 import cc.demo.order.vo.OrderCalculateVo;
 import cc.demo.order.vo.StatisticsVo;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class StatisticsServiceImpl implements StatisticsService {
 
     private final UserService userService;
-    private final OrderInfoRepository orderInfoRepository;
+    private final OrderInfoRepositoryImpl orderInfoRepositoryImpl;
 
 
     public StatisticsVo statistics(int count) {
@@ -38,6 +38,6 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     public List<OrderCalculateVo> getOrderCalculate(int count) {
-        return orderInfoRepository.getOrderCalculate(count);
+        return orderInfoRepositoryImpl.getOrderCalculate(count);
     }
 }
